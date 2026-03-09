@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Background: #ECEFF8 (HSL: 227, 33%, 95%) */
+    --background: 227 33% 95%;
+    --foreground: 225 40% 10%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 225 40% 10%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 225 40% 10%;
+    
+    /* Primary: #4B5D91 (HSL: 225, 32%, 43%) */
+    --primary: 225 32% 43%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 227 20% 90%;
+    --secondary-foreground: 225 32% 43%;
+    
+    --muted: 227 20% 90%;
+    --muted-foreground: 225 15% 40%;
+    
+    /* Accent: #52A2DD (HSL: 205, 70% 59%) */
+    --accent: 205 70% 59%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 225 20% 88%;
+    --input: 225 20% 88%;
+    --ring: 225 32% 43%;
+    
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+.code-container {
+  font-family: 'Source Code Pro', monospace;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/30 transition-colors;
+}

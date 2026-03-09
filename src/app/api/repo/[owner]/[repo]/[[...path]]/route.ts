@@ -92,7 +92,7 @@ async function getRepoFullTree(
 
 export async function GET(
   req: Request,
-  context: { params: Params }
+  context: { params: Promise<Params> }
 ) {
   const session = await getSession();
 
@@ -100,12 +100,13 @@ export async function GET(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const owner = context?.params?.owner;
-  const repo = context?.params?.repo;
+  // IMPORTANT: await params
+  const params = await context.params;
+  const owner = params?.owner;
+  const repo = params?.repo;
 
-  // Prevent undefined repo calls
   if (!owner || !repo) {
-    console.error("Repo API missing params:", context?.params);
+    console.error("Repo API missing params:", params);
 
     return NextResponse.json(
       { error: "Missing repository parameters" },

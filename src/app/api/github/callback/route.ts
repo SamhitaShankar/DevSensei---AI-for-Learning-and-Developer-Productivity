@@ -1,49 +1,48 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createSession } from '@/lib/session';
+import { NextRequest, NextResponse } from "next/server";
+import { createSession } from "@/lib/session";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
-  const code = searchParams.get('code');
+  const code = searchParams.get("code");
 
   const GITHUB_CLIENT_ID =
     process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "Ov23liZpEdu0eKMEAnHR";
   const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 
-  // Detect the current app domain automatically
+  // Detect domain automatically
   const appBaseUrl = req.nextUrl.origin;
   const homeUrl = new URL(appBaseUrl);
 
   if (!GITHUB_CLIENT_SECRET) {
     homeUrl.searchParams.set(
-      'error',
-      'Configuration_Error:_Missing_GITHUB_CLIENT_SECRET'
+      "error",
+      "Configuration_Error:_Missing_GITHUB_CLIENT_SECRET"
     );
     return NextResponse.redirect(homeUrl);
   }
 
   if (!code) {
     homeUrl.searchParams.set(
-      'error',
-      'Authorization_Error:_Code_parameter_is_missing'
+      "error",
+      "Authorization_Error:_Code_parameter_is_missing"
     );
     return NextResponse.redirect(homeUrl);
   }
 
-  // Build callback dynamically
   const callbackUrl = `${appBaseUrl}/api/github/callback`;
 
   try {
     const params = new URLSearchParams();
-    params.append('client_id', GITHUB_CLIENT_ID);
-    params.append('client_secret', GITHUB_CLIENT_SECRET);
-    params.append('code', code);
-    params.append('redirect_uri', callbackUrl);
+    params.append("client_id", GITHUB_CLIENT_ID);
+    params.append("client_secret", GITHUB_CLIENT_SECRET);
+    params.append("code", code);
+    params.append("redirect_uri", callbackUrl);
 
     const tokenResponse = await fetch(
-      'https://github.com/login/oauth/access_token',
+      "https://github.com/login/oauth/access_token",
       {
-        method: 'POST',
-        headers: { Accept: 'application/json' },
+        method: "POST",
+        headers: { Accept: "application/json" },
         body: params,
       }
     );
@@ -52,24 +51,25 @@ export async function GET(req: NextRequest) {
 
     if (tokenData.error) {
       const errorMessage =
-        tokenData.error_description?.replace(/ /g, '_') ||
-        'Unknown_GitHub_Error';
+        tokenData.error_description?.replace(/ /g, "_") ||
+        "Unknown_GitHub_Error";
 
-      homeUrl.searchParams.set('error', `GitHub_Error:_${errorMessage}`);
+      homeUrl.searchParams.set("error", `GitHub_Error:_${errorMessage}`);
       return NextResponse.redirect(homeUrl);
     }
 
     const accessToken = tokenData.access_token;
 
-    const userResponse = await fetch('https://api.github.com/user', {
+    const userResponse = await fetch("https://api.github.com/user", {
       headers: {
         Authorization: `Bearer ${accessToken}`,
-        'User-Agent': 'DevSensei-App',
+        "User-Agent": "DevSensei-App",
       },
     });
 
     const userData = await userResponse.json();
 
+    // Create session cookie
     await createSession({
       accessToken,
       user: {
@@ -81,12 +81,17 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    const dashboardUrl = new URL('/dashboard', appBaseUrl);
+    const dashboardUrl = new URL("/dashboard", appBaseUrl);
     return NextResponse.redirect(dashboardUrl);
 
   } catch (error: any) {
-    console.error('OAuth Callback Error:', error);
-    homeUrl.searchParams.set('error', 'Internal_Server_Error');
+    console.error("OAuth Callback Error:", error);
+
+    homeUrl.searchParams.set(
+      "error",
+      error?.message?.replace(/ /g, "_") || "Internal_Server_Error"
+    );
+
     return NextResponse.redirect(homeUrl);
   }
 }

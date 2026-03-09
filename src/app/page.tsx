@@ -1,8 +1,7 @@
-
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/devsensei/navbar";
 import { LandingPage } from "@/components/devsensei/landing-page";
 import { Toaster } from "@/components/ui/toaster";
@@ -15,11 +14,11 @@ function HomeComponent() {
 
   useEffect(() => {
     setIsMounted(true);
-    const error = searchParams.get('error');
+    const error = searchParams.get("error");
     if (error) {
       toast({
         title: "Authentication Error",
-        description: error.split('_').join(' '),
+        description: error.split("_").join(" "),
         variant: "destructive",
       });
     }
@@ -28,17 +27,18 @@ function HomeComponent() {
   if (!isMounted) return null;
 
   function loginWithGithub() {
-    const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "Ov23liZpEdu0eKMEAnHR";
-    
-    // Use localhost for local development callback
-    const callbackUrl = 'http://localhost:9002/api/github/callback';
+    const GITHUB_CLIENT_ID =
+      process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID || "Ov23liZpEdu0eKMEAnHR";
+
+    // Dynamically detect current domain (works for localhost + production)
+    const callbackUrl = `${window.location.origin}/api/github/callback`;
 
     const redirect =
       "https://github.com/login/oauth/authorize" +
       `?client_id=${GITHUB_CLIENT_ID}` +
       `&redirect_uri=${encodeURIComponent(callbackUrl)}` +
       "&scope=read:user,user:email,repo";
-      
+
     window.location.href = redirect;
   }
 
@@ -48,13 +48,13 @@ function HomeComponent() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background selection:bg-accent/30">
-      <Navbar 
-        isLoggedIn={false} 
-        onLogin={loginWithGithub} 
+      <Navbar
+        isLoggedIn={false}
+        onLogin={loginWithGithub}
         onLogout={() => {}}
         onGoHome={handleGoHome}
       />
-      
+
       <main className="flex-1 flex flex-col">
         <LandingPage onStart={loginWithGithub} />
       </main>
@@ -69,5 +69,5 @@ export default function Home() {
     <Suspense fallback={<div>Loading...</div>}>
       <HomeComponent />
     </Suspense>
-  )
+  );
 }
